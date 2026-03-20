@@ -16,3 +16,35 @@
 - 時系列可視化
 - 地域別比較
 - 相関分析
+
+
+## フロントエンド起動方法
+
+```bash
+cd frontend
+npm install
+npm run dev
+
+
+---
+
+# 12. このブランチでの理想状態
+
+```text
+open-data-dashboard/
+├─ frontend/
+│  ├─ package.json
+│  └─ src/
+│     ├─ app/
+│     │  └─ page.tsx
+│     ├─ components/
+│     │  └─ dashboard/
+│     │     ├─ KpiCard.tsx
+│     │     ├─ TimeSeriesChart.tsx
+│     │     └─ BarComparisonChart.tsx
+│     └─ data/
+│        └─ mockData.ts
+├─ data/
+├─ docs/
+├─ notebooks/
+└─ scripts/

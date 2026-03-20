@@ -1,4 +1,6 @@
-export const mockData = [
+import { DashboardDataPoint } from "@/lib/types";
+
+export const dashboardData: DashboardDataPoint[] = [
   { yearMonth: "2023-01", gasSales: 120, avgTemperature: 5.2 },
   { yearMonth: "2023-02", gasSales: 110, avgTemperature: 6.1 },
   { yearMonth: "2023-03", gasSales: 95, avgTemperature: 10.4 },

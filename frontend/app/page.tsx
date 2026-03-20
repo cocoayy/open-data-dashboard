@@ -1,19 +1,19 @@
 import KpiCard from "@/components/dashboard/KpiCard";
 import TimeSeriesChart from "@/components/dashboard/TimeSeriesChart";
 import BarComparisonChart from "@/components/dashboard/BarComparisonChart";
-import { mockData } from "@/data/mockData";
+import { dashboardData } from "@/data/dashboardData";
 
 function calcAverageSales() {
-  const total = mockData.reduce((sum, item) => sum + item.gasSales, 0);
-  return (total / mockData.length).toFixed(1);
+  const total = dashboardData.reduce((sum, item) => sum + item.gasSales, 0);
+  return (total / dashboardData.length).toFixed(1);
 }
 
 function calcMaxSales() {
-  return Math.max(...mockData.map((item) => item.gasSales));
+  return Math.max(...dashboardData.map((item) => item.gasSales));
 }
 
 function calcMinTemperature() {
-  return Math.min(...mockData.map((item) => item.avgTemperature));
+  return Math.min(...dashboardData.map((item) => item.avgTemperature));
 }
 
 export default function Home() {
@@ -48,8 +48,8 @@ export default function Home() {
         </section>
 
         <section className="grid gap-6 lg:grid-cols-2">
-          <TimeSeriesChart data={mockData} />
-          <BarComparisonChart data={mockData} />
+          <TimeSeriesChart data={dashboardData} />
+          <BarComparisonChart data={dashboardData} />
         </section>
       </div>
     </main>

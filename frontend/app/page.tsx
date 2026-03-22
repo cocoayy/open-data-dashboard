@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import CsvUpload from "@/components/dashboard/CsvUpload";
+import ColumnMappingForm from "@/components/dashboard/ColumnMappingForm";
 import DashboardFilter from "@/components/dashboard/DashboardFilter";
 import KpiCard from "@/components/dashboard/KpiCard";
 import TimeSeriesChart from "@/components/dashboard/TimeSeriesChart";
@@ -10,8 +11,15 @@ import CorrelationChart from "@/components/dashboard/CorrelationChart";
 import CorrelationSummary from "@/components/dashboard/CorrelationSummary";
 import { dashboardData as initialData } from "@/data/dashboardData";
 import { calculateCorrelation } from "@/lib/calcCorrelation";
-import { parseCsvFile } from "@/lib/csvParser";
-import { DashboardDataPoint } from "@/lib/types";
+import {
+  convertRowsToDashboardData,
+  parseCsvPreview,
+} from "@/lib/csvParser";
+import {
+  CsvColumnMapping,
+  CsvRawRow,
+  DashboardDataPoint,
+} from "@/lib/types";
 
 function calcAverageSales(data: DashboardDataPoint[]) {
   if (data.length === 0) return "0";
@@ -29,9 +37,31 @@ function calcMinTemperature(data: DashboardDataPoint[]) {
   return Math.min(...data.map((item) => item.avgTemperature));
 }
 
+function guessColumn(headers: string[], candidates: string[]) {
+  const normalizedHeaders = headers.map((header) => header.trim().toLowerCase());
+
+  for (const candidate of candidates) {
+    const index = normalizedHeaders.findIndex((header) =>
+      header.includes(candidate.toLowerCase())
+    );
+    if (index !== -1) {
+      return headers[index];
+    }
+  }
+
+  return "";
+}
+
 export default function Home() {
   const [data, setData] = useState<DashboardDataPoint[]>(initialData);
   const [errorMessage, setErrorMessage] = useState("");
+  const [previewHeaders, setPreviewHeaders] = useState<string[]>([]);
+  const [previewRows, setPreviewRows] = useState<CsvRawRow[]>([]);
+  const [mapping, setMapping] = useState<CsvColumnMapping>({
+    yearMonthColumn: "",
+    gasSalesColumn: "",
+    avgTemperatureColumn: "",
+  });
 
   const months = data.map((item) => item.yearMonth);
   const [startMonth, setStartMonth] = useState(months[0] ?? "");
@@ -54,7 +84,7 @@ export default function Home() {
   const correlation = calculateCorrelation(filteredData);
 
   const handleFileSelect = async (file: File) => {
-    const result = await parseCsvFile(file);
+    const result = await parseCsvPreview(file);
 
     if (result.errors.length > 0) {
       setErrorMessage(result.errors[0]);
@@ -62,19 +92,47 @@ export default function Home() {
       setErrorMessage("");
     }
 
-    if (result.data.length === 0) {
-      setErrorMessage("有効なデータを読み込めませんでした。列名を確認してください。");
+    setPreviewHeaders(result.headers);
+    setPreviewRows(result.rows);
+
+    setMapping({
+      yearMonthColumn: guessColumn(result.headers, ["yearmonth", "年月", "month", "date"]),
+      gasSalesColumn: guessColumn(result.headers, ["gassales", "販売量", "sales", "volume"]),
+      avgTemperatureColumn: guessColumn(result.headers, ["avgtemperature", "平均気温", "temperature", "temp"]),
+    });
+  };
+
+  const handleApplyMapping = () => {
+    if (
+      !mapping.yearMonthColumn ||
+      !mapping.gasSalesColumn ||
+      !mapping.avgTemperatureColumn
+    ) {
+      setErrorMessage("年月列・販売量列・平均気温列をすべて選択してください。");
       return;
     }
 
-    const sorted = [...result.data].sort((a, b) =>
+    const converted = convertRowsToDashboardData(previewRows, mapping);
+
+    if (converted.length === 0) {
+      setErrorMessage("有効なデータを作成できませんでした。列の選択や値を確認してください。");
+      return;
+    }
+
+    const sorted = [...converted].sort((a, b) =>
       a.yearMonth.localeCompare(b.yearMonth)
     );
 
     setData(sorted);
     setStartMonth(sorted[0]?.yearMonth ?? "");
     setEndMonth(sorted[sorted.length - 1]?.yearMonth ?? "");
+    setErrorMessage("");
   };
+
+  const canApplyMapping =
+    !!mapping.yearMonthColumn &&
+    !!mapping.gasSalesColumn &&
+    !!mapping.avgTemperatureColumn;
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-8">
@@ -84,7 +142,7 @@ export default function Home() {
             Open Data Dashboard
           </h1>
           <p className="mt-2 text-gray-600">
-            CSVをアップロードして需要傾向の可視化・比較・相関分析を行うダッシュボード
+            CSVをアップロードし、列を指定して需要傾向の可視化・比較・相関分析を行うダッシュボード
           </p>
         </header>
 
@@ -94,6 +152,18 @@ export default function Home() {
             errorMessage={errorMessage}
           />
         </section>
+
+        {previewHeaders.length > 0 && (
+          <section className="mb-8">
+            <ColumnMappingForm
+              headers={previewHeaders}
+              mapping={mapping}
+              onChange={setMapping}
+              onApply={handleApplyMapping}
+              disabled={!canApplyMapping}
+            />
+          </section>
+        )}
 
         <section className="mb-8">
           <DashboardFilter

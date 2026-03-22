@@ -7,3 +7,15 @@ export type DashboardDataPoint = {
 export type CsvRawRow = {
   [key: string]: string | number | null | undefined;
 };
+
+export type CsvColumnMapping = {
+  yearMonthColumn: string;
+  gasSalesColumn: string;
+  avgTemperatureColumn: string;
+};
+
+export type ParsedCsvPreview = {
+  headers: string[];
+  rows: CsvRawRow[];
+  errors: string[];
+};

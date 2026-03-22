@@ -4,7 +4,6 @@ export type DashboardDataPoint = {
   avgTemperature: number;
 };
 
-export type DashboardFilterValue = {
-  startMonth: string;
-  endMonth: string;
+export type CsvRawRow = {
+  [key: string]: string | number | null | undefined;
 };

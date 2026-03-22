@@ -6,6 +6,9 @@ import TimeSeriesChart from "@/components/dashboard/TimeSeriesChart";
 import BarComparisonChart from "@/components/dashboard/BarComparisonChart";
 import DashboardFilter from "@/components/dashboard/DashboardFilter";
 import { dashboardData } from "@/data/dashboardData";
+import CorrelationChart from "@/components/dashboard/CorrelationChart";
+import CorrelationSummary from "@/components/dashboard/CorrelationSummary";
+import { calculateCorrelation } from "@/lib/calcCorrelation";
 
 function calcAverageSales(data: typeof dashboardData) {
   if (data.length === 0) return "0";
@@ -43,15 +46,18 @@ export default function Home() {
     });
   }, [startMonth, endMonth, months]);
 
-return (
-  <main className="min-h-screen bg-gray-50 px-6 py-8">
-    <div className="mx-auto max-w-7xl">
-      {filteredData.length === 0 && (
-        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          開始年月と終了年月の指定を見直してください。
-        </div>
-      )}
-      <header className="mb-8">
+  const correlation = calculateCorrelation(filteredData);
+
+  return (
+    <main className="min-h-screen bg-gray-50 px-6 py-8">
+      <div className="mx-auto max-w-7xl">
+        {filteredData.length === 0 && (
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            開始年月と終了年月の指定を見直してください。
+          </div>
+        )}
+
+        <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
             Open Data Dashboard
           </h1>
@@ -91,6 +97,11 @@ return (
         <section className="grid gap-6 lg:grid-cols-2">
           <TimeSeriesChart data={filteredData} />
           <BarComparisonChart data={filteredData} />
+        </section>
+
+        <section className="mt-8 grid gap-6 lg:grid-cols-2">
+          <CorrelationChart data={filteredData} />
+          <CorrelationSummary correlation={correlation} />
         </section>
       </div>
     </main>

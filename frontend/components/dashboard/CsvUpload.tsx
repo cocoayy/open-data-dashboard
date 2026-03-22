@@ -1,7 +1,5 @@
 "use client";
 
-import { useRef } from "react";
-
 type CsvUploadProps = {
   onFileSelect: (file: File) => void;
   errorMessage?: string;
@@ -11,19 +9,16 @@ export default function CsvUpload({
   onFileSelect,
   errorMessage,
 }: CsvUploadProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
       <h2 className="mb-2 text-lg font-semibold text-gray-900">
         CSVアップロード
       </h2>
       <p className="mb-4 text-sm text-gray-600">
-        yearMonth, gasSales, avgTemperature の3列を含むCSVを読み込みます。
+        CSVを読み込み、列の対応関係を指定してダッシュボードを生成します。
       </p>
 
       <input
-        ref={inputRef}
         type="file"
         accept=".csv,text/csv"
         onChange={(e) => {

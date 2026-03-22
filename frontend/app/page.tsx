@@ -20,6 +20,7 @@ import {
   CsvRawRow,
   DashboardDataPoint,
 } from "@/lib/types";
+import CsvPreviewTable from "@/components/dashboard/CsvPreviewTable";
 
 function calcAverageSales(data: DashboardDataPoint[]) {
   if (data.length === 0) return "0";
@@ -152,6 +153,12 @@ export default function Home() {
             errorMessage={errorMessage}
           />
         </section>
+
+        {previewHeaders.length > 0 && previewRows.length > 0 && (
+          <section className="mb-8">
+            <CsvPreviewTable headers={previewHeaders} rows={previewRows} />
+          </section>
+        )}
 
         {previewHeaders.length > 0 && (
           <section className="mb-8">
